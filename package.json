@@ -1,6 +1,6 @@
 {
   "name": "language-riscv",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Adds syntax highlighting to RISC-V assembler files in Atom.",
   "keywords": [
     "asm",
