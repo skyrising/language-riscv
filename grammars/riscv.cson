@@ -1,0 +1,74 @@
+'scopeName': 'source.riscv'
+'fileTypes': [
+  's'
+]
+'name': 'riscv'
+'patterns': [
+  {
+    'match': '[;#].*$'
+    'name': 'comment.line'
+  }
+  {
+    'match': '^\\s*\\.(text|data|bss)\\b'
+    'name': 'string.section'
+  }
+  {
+    'match': '(?i)^[\t ]*(add|adc|adiw|sub|and|or|neg|inc|dec|mul|div(u?)|rem(u?)|muls|j|jal|b[lg][te](u?)|beq|bne|lb|lbu|lh|lhu|lw|sb|sh|sw|push|pop|nop|scall|ret)\\b'
+    'name': 'keyword.mnemonic'
+  }
+  {
+    'match': '(?i)\\b(x[0-9]|x[12][0-9]|x3[12]|ra|sp|gp|tp|t[0-6]|f?s[0-9]|f?s1[01]|fp|f?a[0-7]|ft[0-7])\\b'
+    'name': 'storage.register'
+  }
+  {
+    'match': '^\\s*([^_][^\\r\\n\\t\\f :]*:)[\\t ]*(?=.)'
+    'name': 'entity.name.variable'
+  }
+  {
+    'match': '^\\s*([^_][^\\r\\n\\t\\f :]*:)[\\t ]*(?=$|;|#)'
+    'name': 'entity.name.function'
+  }
+  {
+    'match': '^\\s*([^\\r\\n\\t\\f :]*:)[\\t ]*(?=$|;|#)'
+    'name': 'entity.name.type'
+  }
+  {
+    'match': '\\b(zero)\\b'
+    'name': 'constant.numeric.variable'
+  }
+  {
+    'match': '\\.(align|space|asciiz|byte|half|word)\\b'
+    'name': 'storage'
+  }
+  {
+    'match': '\\$(0[bx])?[0-9a-fA-F]+\\b'
+    'name': 'constant.numeric.literal'
+  }
+  {
+    'match': '\\b[0-9]+\\b'
+    'name': 'constant.numeric.dec'
+  }
+  {
+    'match': '\\b($[0-9a-fA-F]+h?|0x[0-9a-fA-F]+)\\b'
+    'name': 'constant.numeric.hex'
+  }
+  {
+    'begin': '"'
+    'beginCaptures':
+      '0':
+        'name': 'punctuation.definition.string.begin.asm'
+    'end': '"'
+    'endCaptures':
+      '0':
+        'name': 'punctuation.definition.string.end.asm'
+    'name': 'string.quoted.asm'
+    'patterns': [
+      {
+        'include': '#string_escaped_char'
+      }
+      {
+        'include': '#string_placeholder'
+      }
+    ]
+  }
+]
