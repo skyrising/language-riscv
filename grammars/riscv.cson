@@ -1,80 +1,136 @@
-'scopeName': 'source.riscv'
-'fileTypes': [
+scopeName: 'source.riscv'
+fileTypes: [
   's'
 ]
-'name': 'RISC-V Assembler'
-'patterns': [
+name: 'RISC-V Assembler'
+foldingStartMarker: '^\\.[a-z]+\\s*$'
+foldingEndMarker: '(?=^\\.[a-z]+\\s*$)'
+patterns: [
   {
-    'match': '[;#].*$'
-    'name': 'comment.line'
+    include: '#line'
   }
-  {
-    'match': '^\\s*\\.(text|data|bss|section)\\b'
-    'name': 'string.section'
-  }
-  {
-    'match': '(?i)^(\\d+:)?[\t ]*\\b((mv|add|sll|slt|xor|srl|sra|or|and)i?|adc|(add|sll|srl|sra)i?w|sub|subw|slt(i)?u|(mul|div(u)?)(w)?|rem(u)?(w)?|mulh(s)?(u)?|muls|j|jal(r)?|(b[lg][te](u)?|beq|bne)z?|fence(\.i)?|lui|auipc|l[aibhw](u?)|ld|s[bhwd]|push|pop|nop|[se](call|break)|[ushmd]?ret|sfence\.vm|wfi|csr[rws]([wsc]i?)?|fssr|f(add|sub|mul|div|sgnj[nx]?|min|max|sqrt)\.[sd]|fcvt\.(s\.d|d\.s)|fcvt\.(w|wu|l|lu)\.[sd]|fcvt\.[sd]\.(w|wu|l|lu)|fmv\.x\.[sd]|fmv\.[sd]\.x|fclass\.[sd]|f(l[te]|eq)\.[sd]|f[ls][wd]|f(n)?m(add|sub)\.[sd]|amo(add|xor|or|and|min[u]?|max[u]?|swap)\.[wd]|(lr|sc)\.[wd])\\b'
-    'name': 'keyword.mnemonic'
-  }
-  {
-    'match': '(?i)\\b([xf][0-9]|[xf][012][0-9]|[xf]3[012]|ra|[sgtf]p|t[0-6]|f?s[0-9]|f?s1[01]|f?a[0-7]|ft[0-7])\\b'
-    'name': 'storage.register'
-  }
-  {
-    'match': '^\\s*([^_][^\\r\\n\\t\\f :]*:)[\\t ]*(?=\\.)'
-    'name': 'entity.name.constant'
-  }
-  {
-    'match': '^\\s*([^_][^\\r\\n\\t\\f :]*:)[\\t ]*(?=$|;|#)'
-    'name': 'entity.name.function'
-  }
-  {
-    'match': '^\\s*([^\\r\\n\\t\\f :]*:)[\\t ]*(?=$|;|#)'
-    'name': 'entity.name.type'
-  }
-  {
-    'match': '\\b(zero)\\b'
-    'name': 'constant.numeric.variable'
-  }
-  {
-    'begin': '\\.glob(a)?l[\t ]+'
-    'beginCaptures':
+]
+repository:
+  line:
+    begin: '^'
+    end: '$'
+    patterns: [
+      {
+        include: '#constant'
+      }
+      {
+        include: '#label'
+      }
+      {
+        include: '#instr'
+      }
+      {
+        include: '#comment'
+      }
+      {
+        include: '#section'
+      }
+      {
+        include: '#global'
+      }
+      {
+        include: '#storage'
+      }
+    ]
+  section:
+    patterns: [
+      {
+        begin: '^\\s*\\.(text|data|bss)\\b'
+        end: '(?=$|;|#)'
+        patterns: [
+          {
+            include: '#number'
+          }
+          {
+            include: '#progbits'
+          }
+        ]
+        name: 'string.section'
+      }
+      {
+        begin: '^\\s*\\.section\\s+'
+        end: '(?=$|;|#)'
+        patterns: [
+          {
+            include: '#string'
+          }
+          {
+            include: '#number'
+          }
+          {
+            include: '#progbits'
+          }
+        ]
+        name: 'string.section'
+      }
+    ]
+  global:
+    match: '(\\.glob(?:a)?l)[\t ]+(.*?)($|;|#)'
+    captures:
+      '1':
+        name: 'keyword.control'
+      '2':
+        name: 'entity.name.constant'
+  label:
+    name: 'label'
+    patterns: [
+      {
+        include: '#label-function'
+      }
+      {
+        include: '#label-branch'
+      }
+    ]
+  'label-function':
+    name: 'label.entity.name.function'
+    match: '^\\s*([a-z0-9]\\w*:)'
+  'label-branch':
+    name: 'label.entity.name.type'
+    match: '^\\s*([_A-Za-z0-9]\\w*:)'
+  comment:
+    match: '[;#].*$'
+    name: 'comment.line'
+  constant:
+    name: 'constant'
+    patterns: [
+      {
+        include: '#number'
+      }
+    ]
+  progbits:
+    match: '@progbits\\b'
+    name: 'constant.numeric.literal'
+  number:
+    name: 'constant.numeric'
+    patterns: [
+      {
+        include: '#progbits'
+      }
+      {
+        match: '([+-]|\\b)[0-9]+\\b'
+        name: 'constant.numeric.dec'
+      }
+      {
+        match: '\\b0x[0-9a-fA-F]+\\b'
+        name: 'constant.numeric.hex'
+      }
+    ]
+  string:
+    begin: '"|\''
+    beginCaptures:
       '0':
-        'name': 'keyword.control'
-    'end': '$'
-    'name': 'entity.name.constant'
-  }
-  {
-    'match': '\\.(align|space|fill|asciiz|byte|half|[d]?word)\\b'
-    'name': 'storage'
-  }
-  {
-    'match': '@progbits\\b'
-    'name': 'constant.numeric.literal'
-  }
-  {
-    'match': '\\$(0[bx])?[0-9a-fA-F]+\\b'
-    'name': 'constant.numeric.literal'
-  }
-  {
-    'match': '\\b[0-9]+\\b'
-    'name': 'constant.numeric.dec'
-  }
-  {
-    'match': '\\b($[0-9a-fA-F]+h?|(0x)?[0-9a-fA-F]+)\\b'
-    'name': 'constant.numeric.hex'
-  }
-  {
-    'begin': '"|\''
-    'beginCaptures':
-      '0':
-        'name': 'punctuation.definition.string.begin.asm'
-    'end': '"|\''
-    'endCaptures':
+        name: 'punctuation.definition.string.begin.asm'
+    end: '"|\''
+    endCaptures:
       '0':
         'name': 'punctuation.definition.string.end.asm'
-    'name': 'string.quoted.asm'
-    'patterns': [
+    name: 'string.quoted.asm'
+    patterns: [
       {
         'include': '#string_escaped_char'
       }
@@ -82,5 +138,194 @@
         'include': '#string_placeholder'
       }
     ]
-  }
-]
+  'mem-loc':
+    match: '((?:(?:[+-]|\\b)[0-9]+)|0x[0-9A-Fa-f]+|[a-z]+)(\\()(x[0-9]|x[012][0-9]|x3[012]|ra|[sgtf]p|t[0-6]|(zero))(\\))'
+    captures:
+      '1':
+        name: 'constant.number'
+      '2':
+        name: 'meta.brace.open.paren'
+      '3':
+        name: 'storage.register'
+      '4':
+        name: 'support.constant.numeric.variable'
+      '5':
+        name: 'meta.brace.close.paren'
+    name: 'storage.memory'
+  register:
+    patterns: [
+      {
+        match: '\\b([xf][0-9]|[xf][012][0-9]|[xf]3[012]|ra|[sgtf]p|t[0-6]|f?s[0-9]|f?s1[01]|ft[0-7])\\b'
+        name: 'storage.register'
+      }
+      {
+        match: '\\b(f?a[0-7])\\b'
+        name: 'variable.other'
+      }
+      {
+        match: '\\bzero\\b'
+        name: 'support.constant.numeric.variable'
+      }
+    ]
+    name: 'storage.register'
+  instr:
+    patterns: [
+      {
+        include: '#instr-imm'
+      }
+      {
+        include: '#instr-load'
+      }
+      {
+        include: '#instr-store'
+      }
+      {
+        include: '#instr-call'
+      }
+      {
+        include: '#instr-branch'
+      }
+      {
+        include: '#instr-csr'
+      }
+      {
+        include: '#instr-mnemotic-only'
+      }
+      {
+        include: '#instr-other'
+      }
+    ]
+  'instr-load':
+    begin: '\\b(l[aibhw](u?)|ld)\\b'
+    beginCaptures:
+      '0':
+        name: 'keyword.mnemonic'
+    end: '(?=$|;|#)'
+    patterns: [
+      {
+        include: '#register'
+      }
+      {
+        include: '#mem-loc'
+      }
+    ]
+  'instr-store':
+    begin: '\\bs[aibhwd]\\b'
+    beginCaptures:
+      '0':
+        name: 'keyword.mnemonic'
+    end: '(?=$|;|#)'
+    patterns: [
+      {
+        include: '#register'
+      }
+      {
+        include: '#mem-loc'
+      }
+    ]
+  'instr-imm':
+    begin: '\\b(mv|li|(add|sll|slt|xor|srl|sra|or|and)i?|adc|(add|sll|srl|sra)i?w|sub|subw|lui|auipc)\\b'
+    beginCaptures:
+      '0':
+        name: 'keyword.mnemonic'
+    end: '(?![0-9a-f])(?=$|;|#)'
+    patterns: [
+      {
+        include: '#register'
+      }
+      {
+        include: '#number'
+      }
+    ]
+    name: 'instruction.immediate'
+  'instr-mnemotic-only':
+    match: '\\b(fence(\.i)?|nop|[se](call|break)|[ushmd]?ret|wfi)\\b'
+    name: 'keyword.mnemonic'
+  'instr-branch':
+    begin: '\\b(j|jr|(b[lg][te](u)?|beq|bne)z?)\\b'
+    beginCaptures:
+      '0':
+        name: 'keyword.mnemonic'
+    end: '\\b(.*?)(?=$|;|#)'
+    endCaptures:
+      '1':
+        name: 'entity.name.type'
+    patterns: [
+      {
+        include: '#register'
+      }
+    ]
+  'instr-call':
+    begin: '\\b(jal|jalr)\\b'
+    beginCaptures:
+      '0':
+        name: 'keyword.mnemonic'
+    end: '\\b(.*?)(?=$|;|#)'
+    endCaptures:
+      '1':
+        name: 'entity.name.function'
+    patterns: [
+      {
+        include: '#register'
+      }
+    ]
+    name: 'meta.method.call'
+  'instr-csr':
+    begin: '\\b(csr[rws]([wsc]i?)?)\\b'
+    beginCaptures:
+      '0':
+        name: 'keyword.mnemonic'
+    end: '(?=$|;|#)'
+    patterns: [
+      {
+        include: '#register'
+      }
+      {
+        include: '#csr'
+      }
+      {
+        include: '#number'
+      }
+    ]
+  'instr-other':
+    begin: '\\b(slt(i)?u|(mul|div(u)?)(w)?|rem(u)?(w)?|mulh(s)?(u)?|muls|push|pop|[ushmd]?ret|sfence\.vma|fssr|f(add|sub|mul|div|sgnj[nx]?|min|max|sqrt)\.[sd]|fcvt\.(s\.d|d\.s)|fcvt\.(w|wu|l|lu)\.[sd]|fcvt\.[sd]\.(w|wu|l|lu)|fmv\.x\.[sd]|fmv\.[sd]\.x|fclass\.[sd]|f(l[te]|eq)\.[sd]|f[ls][wd]|f(n)?m(add|sub)\.[sd]|amo(add|xor|or|and|min[u]?|max[u]?|swap)\.[wd]|(lr|sc)\.[wd])\\b'
+    beginCaptures:
+      '0':
+        name: 'keyword.mnemonic'
+    end: '(?=$|;|#)'
+    patterns: [
+      {
+        include: '#register'
+      }
+      {
+        include: '#number'
+      }
+    ]
+  csr:
+    match: '\\b(mtvec|mstatus|misa|mhartid|mcause|mepc)\\b'
+    name: 'support.variable'
+  storage:
+    begin: '\\.(align|space|fill|asciiz|byte|half|[d]?word)\\b'
+    beginCaptures:
+      '0':
+        name: 'storage.type'
+    end: '(?=$|;|#)'
+    patterns: [
+      {
+        include: '#string'
+      }
+      {
+        include: '#number'
+      }
+    ]
+  constant:
+    begin: '^\\s*([^_][^:]*:)[\\t ]*(?=\\.)'
+    beginCaptures:
+      '1':
+        name: 'entity.name.constant'
+    end: '(?=$|;|#)'
+    patterns: [
+      {
+        include: '#storage'
+      }
+    ]
